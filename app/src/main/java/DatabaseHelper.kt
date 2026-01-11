@@ -9,13 +9,14 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "UserDatabase.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
         private const val TABLE_USERS = "users"
 
         // Columns
         private const val COLUMN_ID = "id"
         private const val COLUMN_USERNAME = "username"
         private const val COLUMN_PASSWORD = "password"
+        private const val COLUMN_EMAIL = "email"
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -23,7 +24,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             CREATE TABLE $TABLE_USERS (
                 $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 $COLUMN_USERNAME TEXT UNIQUE NOT NULL,
-                $COLUMN_PASSWORD TEXT NOT NULL
+                $COLUMN_PASSWORD TEXT NOT NULL,
+                $COLUMN_EMAIL TEXT UNIQUE NOT NULL
             )
         """.trimIndent()
         db?.execSQL(createTable)
@@ -35,10 +37,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     // Thêm user mới (Đăng ký)
-    fun addUser(username: String, password: String): Boolean {
+    fun addUser(username: String,email: String , password: String): Boolean {
         val db = this.writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_USERNAME, username)
+            put(COLUMN_EMAIL, email)
             put(COLUMN_PASSWORD, password)
         }
 
@@ -52,6 +55,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.readableDatabase
         val query = "SELECT * FROM $TABLE_USERS WHERE $COLUMN_USERNAME = ? AND $COLUMN_PASSWORD = ?"
         val cursor = db.rawQuery(query, arrayOf(username, password))
+        val exists = cursor.count > 0
+        cursor.close()
+        db.close()
+        return exists
+    }
+
+    fun isEmailExists(email: String): Boolean {
+        val db = this.readableDatabase
+        val query = "SELECT * FROM $TABLE_USERS WHERE $COLUMN_EMAIL = ?"
+        val cursor = db.rawQuery(query, arrayOf(email))
         val exists = cursor.count > 0
         cursor.close()
         db.close()

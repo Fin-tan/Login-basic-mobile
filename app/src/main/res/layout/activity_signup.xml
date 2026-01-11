@@ -9,6 +9,25 @@
     tools:context=".login">
 
     <EditText
+        android:id="@+id/editemail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="88dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginBottom="6dp"
+        android:ems="10"
+        android:hint="Email"
+        android:inputType="text"
+        android:minHeight="48dp"
+        app:layout_constraintBottom_toTopOf="@+id/editusername"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.66" />
+
+    <EditText
         android:id="@+id/editusername"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

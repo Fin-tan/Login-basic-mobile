@@ -13,9 +13,9 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.edit
-
+import com.example.loginbasic.SQLiteConnector
 class login : AppCompatActivity() {
-    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var dbHelper: SQLiteConnector
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var editUsername: EditText
     private lateinit var editPassword: EditText
@@ -30,7 +30,7 @@ class login : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        dbHelper = DatabaseHelper(this)
+        dbHelper = SQLiteConnector(this)
         sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
 
         // Kiểm tra xem user đã login chưa

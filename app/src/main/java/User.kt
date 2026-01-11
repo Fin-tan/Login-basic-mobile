@@ -1,6 +1,8 @@
 package com.example.loginbasic
+
 data class User(
-    val id: Int = 0,
-    val username: String,
-    val password: String
+    var id: Int = 0,
+    var name: String="",
+    var email: String="",
+    var password: String=""
 )

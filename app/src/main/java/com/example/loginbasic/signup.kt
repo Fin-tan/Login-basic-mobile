@@ -10,9 +10,11 @@ import android.content.Intent
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-
+import com.example.loginbasic.SQLiteConnector
 class signup : AppCompatActivity() {
-    private lateinit var dbHelper: DatabaseHelper
+
+    private lateinit var dbHelper: SQLiteConnector
+    private lateinit var editEmail: EditText
     private lateinit var editUsername: EditText
     private lateinit var editPassword: EditText
     private lateinit var btnSignup: Button
@@ -26,17 +28,22 @@ class signup : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        dbHelper=DatabaseHelper(this)
+        dbHelper=SQLiteConnector(this)
 
         editUsername=findViewById(R.id.editusername)
         editPassword=findViewById(R.id.editpassword)
+        editEmail=findViewById(R.id.editemail)
         btnSignup=findViewById(R.id.btnSignup)
         tvLogin=findViewById<TextView>(R.id.tvLogin)
         btnSignup.setOnClickListener {
+            val email    = editEmail.text.toString().trim()
             val username = editUsername.text.toString().trim()
             val password = editPassword.text.toString().trim()
 
             when {
+                email.isEmpty() -> {
+                    Toast.makeText(this, "Please enter email", Toast.LENGTH_SHORT).show()
+                }
                 username.isEmpty() -> {
                     Toast.makeText(this, "Please enter username", Toast.LENGTH_SHORT).show()
                 }
@@ -46,20 +53,22 @@ class signup : AppCompatActivity() {
                 password.length < 6 -> {
                     Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
                 }
-                dbHelper.isUsernameExists(username) -> {
-                    Toast.makeText(this, "Username already exists", Toast.LENGTH_SHORT).show()
+
+                dbHelper.checkUser(email) -> {
+                    Toast.makeText(this, "Email này đã tồn tại", Toast.LENGTH_SHORT).show()
                 }
                 else -> {
-                    val success = dbHelper.addUser(username, password)
-                    if (success) {
-                        Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
-                        // Chuyển sang màn hình login
-                        val intent = Intent(this, login::class.java)
-                        startActivity(intent)
-                        finish()
-                    } else {
-                        Toast.makeText(this, "Registration failed. Try again.", Toast.LENGTH_SHORT).show()
-                    }
+                    val newUser = User()
+                    newUser.name = username  // Lưu ý: xem bên model User bạn đặt là name hay username
+                    newUser.email = email
+                    newUser.password = password
+
+
+                    dbHelper.addUser(newUser)
+                    Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this, login::class.java)
+                    startActivity(intent)
+                    finish()
                 }
             }
         }
