@@ -5,13 +5,13 @@
 -keep class android.database.** { *; }
 
 # Keep your model classes
--keep class com.example.loginbasic.User { *; }
+#-keep class com.example.loginbasic.User { *; }
 -keep class com.example.loginbasic.DatabaseHelper { *; }
 
 # Keep Activities
--keep class com.example.loginbasic.login { *; }
--keep class com.example.loginbasic.signup { *; }
--keep class com.example.loginbasic.Home { *; }
+#-keep class com.example.loginbasic.login { *; }
+#-keep class com.example.loginbasic.signup { *; }
+#-keep class com.example.loginbasic.Home { *; }
 
 # Keep Android components
 -keep public class * extends android.app.Activity

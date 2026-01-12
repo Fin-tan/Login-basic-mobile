@@ -13,14 +13,15 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.edit
-import com.example.loginbasic.SQLiteConnector
+
 class login : AppCompatActivity() {
-    private lateinit var dbHelper: SQLiteConnector
+
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var editUsername: EditText
     private lateinit var editPassword: EditText
     private lateinit var btnLogin: Button
     private lateinit var tvSignup: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -30,52 +31,56 @@ class login : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        dbHelper = SQLiteConnector(this)
+
         sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
 
-        // Kiểm tra xem user đã login chưa
         if (isUserLoggedIn()) {
             goToHome()
             return
         }
 
-        // Ánh xạ views
         editUsername = findViewById(R.id.editusername)
         editPassword = findViewById(R.id.editpassword)
         btnLogin = findViewById(R.id.Login)
-        tvSignup= findViewById(R.id.tvSignup)
+        tvSignup = findViewById(R.id.tvSignup)
 
-        // Xử lý login
         btnLogin.setOnClickListener {
             val username = editUsername.text.toString().trim()
             val password = editPassword.text.toString().trim()
 
-            when {
-                username.isEmpty() -> {
-                    Toast.makeText(this, "Please enter username", Toast.LENGTH_SHORT).show()
-                }
-                password.isEmpty() -> {
-                    Toast.makeText(this, "Please enter password", Toast.LENGTH_SHORT).show()
-                }
-                else -> {
-                    if (dbHelper.checkUser(username, password)) {
-                        // Lưu trạng thái login
+            if (username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đủ thông tin", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Băm pass nhập vào để so sánh
+            val hashedPassword = HashUtils.hashPassword(password)
+
+            Thread {
+                // PostgREST Filter: ?username=eq.abc&password=eq.xyz
+                val url = "http://10.0.2.2:3000/users?username=eq.$username&password=eq.$hashedPassword"
+
+                val result = NetworkUtils.sendRequest(url, "GET")
+
+                runOnUiThread {
+                    // Nếu tìm thấy, PostgREST trả về mảng JSON: [{"id":1, ...}]
+                    // Nếu sai, trả về mảng rỗng: []
+
+                    if (result.contains("\"username\"")) { // Kiểm tra xem có field username trong kết quả ko
                         saveLoginState(username)
                         Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
                         goToHome()
                     } else {
-                        Toast.makeText(this, "Invalid username or password", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Sai tài khoản hoặc mật khẩu (hoặc lỗi Server)", Toast.LENGTH_SHORT).show()
                     }
                 }
-            }
+            }.start()
         }
 
-        // Chuyển sang màn hình signup
         tvSignup.setOnClickListener {
-            val intent= Intent(this,signup::class.java)
+            val intent = Intent(this, signup::class.java)
             startActivity(intent)
             finish()
-
         }
     }
 
